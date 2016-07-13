@@ -50,7 +50,6 @@ OKDALM = One Key to Deploy Android Library to Maven
         artifactory_contextUrl=http://localhost:8081/artifactory
         artifactory_snapshot_repoKey=libs-snapshot-local
         artifactory_release_repoKey=libs-release-local
-        #version_prefix一般可保留为空字符串，不用修改
         version_prefix=
         
         
