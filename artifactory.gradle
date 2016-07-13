@@ -1,0 +1,99 @@
+
+allprojects {
+    repositories {
+        maven { url 'http://repo.jfrog.org/artifactory/gradle-plugins' }
+        maven{ url "${artifactory_contextUrl}/${artifactory_snapshot_repoKey}" }
+        maven{ url "${artifactory_contextUrl}/${artifactory_release_repoKey}" }
+    }
+    configurations.all {
+        resolutionStrategy.cacheChangingModulesFor 0, 'seconds'
+    }
+}
+
+def SNAPSHOT_MAVEN_TYPE = 'snapshot'
+//configure(allprojects.findAll { it.name.startsWith('lib_') || it.name.equals('pullToRefresh_Lib') }) {//所有名称以lib_开头的module
+subprojects {
+    //artifactory相关
+    apply plugin: 'com.jfrog.artifactory'
+    apply plugin: 'maven-publish'
+
+    //读取module的version
+    def Properties props = new Properties()
+    File propFile = file(file("temp").parentFile.parentFile.absolutePath + "/artifactory_version.properties");
+    if (propFile.exists()) {
+        props.load(new FileInputStream(propFile))
+    }
+    def maven_type = props.getProperty("maven_type")
+    def versionType = maven_type == SNAPSHOT_MAVEN_TYPE ? '-SNAPSHOT' : ''
+    publishing {
+        publications {
+            aar(MavenPublication) {
+                def libVersion = props.getProperty(project.name)
+                if (libVersion == null || !project.hasProperty('android'))
+                    return
+                libVersion += versionType
+
+                groupId maven_groupId
+                version = libVersion
+                artifactId project.getName()
+
+                // Tell maven to prepare the generated "*.aar" file for publishing
+                artifact("${buildDir}/outputs/aar/${project.getName()}-release.aar")
+
+                //The publication doesn't know about our dependencies, so we have to manually add them to the pom
+                pom.withXml {
+                    //Creating additional node for dependencies
+                    def dependenciesNode = asNode().appendNode('dependencies')
+
+                    //Defining configuration names from which dependencies will be taken (debugCompile or releaseCompile and compile)
+                    def configurationNames = ["releaseCompile", 'compile']
+                    configurationNames.each { configurationName ->
+                        project.configurations.getByName(configurationName).allDependencies.each {
+                            if (it.group != null && it.name != null && it.group != project.parent.name) {
+                                def dependencyNode = dependenciesNode.appendNode('dependency')
+                                dependencyNode.appendNode('groupId', it.group)
+                                dependencyNode.appendNode('artifactId', it.name)
+                                dependencyNode.appendNode('version', it.version)
+
+                                //If there are any exclusions in dependency
+                                if (it.excludeRules.size() > 0) {
+                                    def exclusionsNode = dependencyNode.appendNode('exclusions')
+                                    it.excludeRules.each { rule ->
+                                        def exclusionNode = exclusionsNode.appendNode('exclusion')
+                                        exclusionNode.appendNode('groupId', rule.group)
+                                        exclusionNode.appendNode('artifactId', rule.module)
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    artifactory {//artifactory配置
+        contextUrl = "${artifactory_contextUrl}"   //The base Artifactory URL if not overridden by the publisher/resolver
+        publish {
+            repository {
+                repoKey = maven_type == SNAPSHOT_MAVEN_TYPE ? artifactory_snapshot_repoKey : artifactory_release_repoKey
+                username = "${artifactory_user}"
+                password = "${artifactory_password}"
+                maven = true
+            }
+            defaults {
+                // Tell the Artifactory Plugin which artifacts should be published to Artifactory.
+                publications('aar')
+                publishArtifacts = true
+
+                // Properties to be attached to the published artifacts.
+                properties = ['qa.level': 'basic', 'dev.team': 'core']
+                // Publish generated POM files to Artifactory (true by default)
+                publishPom = true //Publish generated POM files to Artifactory (true by default)
+                publishIvy = false //Publish generated Ivy descriptor files to Artifactory (true by default)
+            }
+
+        }
+    }
+}
+
+

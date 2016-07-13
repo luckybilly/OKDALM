@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">DevelopToolDemo</string>
+    <string name="demo_str">"deploy tool demo\n(dependencies defined at 'app/build.gradle'):"</string>
+</resources>
