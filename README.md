@@ -4,7 +4,7 @@ OKDALM = One Key to Deploy Android Library to Maven
 
 ##适用范围
 
-中型团队进行多人协作，有公司内部的lib工程并存放在公司maven私服，lib模块之间、app引用lib模块的方式使用maven方式进行依赖
+有公司内部的lib工程并希望（或已经）存放在公司maven私服，lib模块之间、app引用lib模块的方式使用maven方式进行依赖
 
 尤其适合作者当前的项目结构：
 
@@ -15,19 +15,24 @@ OKDALM = One Key to Deploy Android Library to Maven
     |        lib_module_n      |          app_n      |         app_n    |
     +--------------------------+---------------------+------------------+
     
-
+##作用
+- 规范代码管理：公共库专人维护
+- 便于使用Jenkins进行持续集成
+- 一条命令即可deploy发生修改的module及依赖该module的其它module，并立即生效
+- 可以按照工程中module依赖关系的顺序deploy all
+- 便于管理module是否进行deploy管理（通过是否在artifactory_version.properties中进行配置确定）
 
 ##使用方式
 
 ###涉及到的文件有
 
-- python_tools 文件夹
-- artifactory.gradle
-- artifactory_version.properties
-- build.gradle
-- deploy.py
-- gradle.properties
-- 各module目录下的build.gradle文件
+- python_tools 文件夹          （新建：脚本库）
+- artifactory.gradle          （新建：artifactory设置）
+- artifactory_version.properties    （新建：module通过artifactory发布到maven的版本配置）
+- build.gradle                （修改：工程的构建脚本，需要添加对artifactory的支持）
+- deploy.py                     （新建：deploy的入口，作者当前用的python版本为2.7.10，python3未测试）
+- gradle.properties             （修改：添加deploy相关设置项）
+- 各module目录下的build.gradle文件 （修改：将module间的依赖改为maven方式）
 
 ###初次使用
 假定当前lib工程名称为：CommonLib
@@ -40,6 +45,13 @@ OKDALM = One Key to Deploy Android Library to Maven
     - artifactory.gradle
     - artifactory_version.properties
     - deploy.py
+- 修改build.gradle文件
+    - 添加对artifactory.gradle的引用：
+    
+        apply from: "artifactory.gradle"
+    - buildscript -> dependencies下添加
+    
+        classpath(group: 'org.jfrog.buildinfo', name: 'build-info-extractor-gradle', version: '4.1.1')
 - 修改CommonLib根目录的gradle.properties文件
     - 将以下内容复制到CommonLib/gradle.properties中，并进行相应的修改
     
