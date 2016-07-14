@@ -55,16 +55,15 @@ OKDALM = One Key to Deploy Android Library to Maven
 - 修改CommonLib根目录的gradle.properties文件
     - 将以下内容复制到CommonLib/gradle.properties中，并进行相应的修改
     
-
+        <pre>
         maven_groupId=your.group.id
         artifactory_user=admin
         artifactory_password=password
         artifactory_contextUrl=http://localhost:8081/artifactory
         artifactory_snapshot_repoKey=libs-snapshot-local
         artifactory_release_repoKey=libs-release-local
-        #version_prefix一般可保留为空字符串，不用修改
         version_prefix=
-        
+        </pre>
         
 - 修改CommonLib/artifactory_version.properties
 
