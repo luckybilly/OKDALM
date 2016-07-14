@@ -48,10 +48,12 @@ OKDALM = One Key to Deploy Android Library to Maven
 - 修改build.gradle文件
     - 添加对artifactory.gradle的引用：
     
-        apply from: "artifactory.gradle"
+            apply from: "artifactory.gradle"
+        
     - buildscript -> dependencies下添加
     
-        classpath(group: 'org.jfrog.buildinfo', name: 'build-info-extractor-gradle', version: '4.1.1')
+            classpath(group: 'org.jfrog.buildinfo', name: 'build-info-extractor-gradle', version: '4.1.1')
+        
 - 修改CommonLib根目录的gradle.properties文件
     - 将以下内容复制到CommonLib/gradle.properties中，并进行相应的修改
     
