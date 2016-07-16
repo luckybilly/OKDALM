@@ -110,7 +110,7 @@ OKDALM = One Key to Deploy Android Library to Maven
         - <code>python deploy.py module_name</code>
     - 测试&修改
     - deploy正式版：
-        - <code>python -r deploy.py module_name</code>
+        - <code>python deploy.py -r module_name</code>
         
         
         
