@@ -104,7 +104,7 @@ OKDALM = One Key to Deploy Android Library to Maven
 - 新建lib module
     - 在artifactory_version.properties中添加对应的版本号（否则将不能进行deploy）
     - deploy到maven私服： 
-        - <code>python -r -c deploy.py module_name</code>
+        - <code>python deploy.py -r -c module_name</code>
     - 依赖该module的module使用maven方式添加依赖，版本号为上一步在gradle.properties中生成的版本号变量名
     - 再次deploy到maven私服：脚本自动将所有依赖该module的所有module deploy一遍
         - <code>python deploy.py module_name</code>
